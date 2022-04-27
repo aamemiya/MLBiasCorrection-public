@@ -1,0 +1,8 @@
+None 0.2097
+Linear 0.1960
+Linear4th 0.1922
+Dense_single 0.1841
+Dense 0.1811
+SimpleRNN 0.1761
+GRU 0.1702
+LSTM 0.1654

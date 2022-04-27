@@ -1,0 +1,17 @@
+fact_infl =  1.2 rmse mean = 0.1379527173225068
+fact_infl =  1.4 rmse mean = 0.11318915464081475
+fact_infl =  1.6 rmse mean = 0.10321319943673524
+fact_infl =  1.8 rmse mean = 0.10345128407237687
+fact_infl =  2.0 rmse mean = 0.10769680222964972
+fact_infl =  2.2 rmse mean = 0.11961430641723383
+fact_infl =  2.4 rmse mean = 0.1295884521797904
+fact_infl =  2.6 rmse mean = 0.15005784482650522
+fact_infl =  2.8 rmse mean = 0.16786498105232214
+fact_infl =  3.0 rmse mean = 0.1910558060532379
+fact_infl =  3.2 rmse mean = 0.22644414192360293
+fact_infl =  3.4 rmse mean = 0.2587091695684475
+fact_infl =  3.6 rmse mean = 0.31761838388845026
+fact_infl =  3.8 rmse mean = 0.38735126602121295
+fact_infl =  4.0 rmse mean = 0.68147085519279
+fact_infl =  4.2 rmse mean = 1.8027798849102659
+fact_infl =  4.4 rmse mean = 5.5465507766740485

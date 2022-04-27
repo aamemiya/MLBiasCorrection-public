@@ -1,0 +1,17 @@
+fact_infl =  1.2 rmse mean = 0.43737159348213955
+fact_infl =  1.4 rmse mean = 0.21581588556833173
+fact_infl =  1.6 rmse mean = 0.1657956832546423
+fact_infl =  1.8 rmse mean = 0.14213901216517655
+fact_infl =  2.0 rmse mean = 0.13644646932983343
+fact_infl =  2.2 rmse mean = 0.13896905552778607
+fact_infl =  2.4 rmse mean = 0.15016259321626016
+fact_infl =  2.6 rmse mean = 0.16600478450952738
+fact_infl =  2.8 rmse mean = 0.18832076229369296
+fact_infl =  3.0 rmse mean = 0.21212324115774825
+fact_infl =  3.2 rmse mean = 0.2518605312318337
+fact_infl =  3.4 rmse mean = 0.31645541294189383
+fact_infl =  3.6 rmse mean = 0.4410645176372548
+fact_infl =  3.8 rmse mean = 0.6368774709616755
+fact_infl =  4.0 rmse mean = 1.3648116740399325
+numpy.linalg.LinAlgError: Array must not contain infs or NaNs
+numpy.linalg.LinAlgError: Array must not contain infs or NaNs

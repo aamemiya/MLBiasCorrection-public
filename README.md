@@ -3,7 +3,7 @@
 
 
 ## Acknowledgement
-The main part of the Lorenz96 LETKF code is originally developed by Shigenori Otsuka ([https://github.com/otsuka-shigenori/da_demo](https://github.com/otsuka-shigenori/da_demo))
+The main part of the Lorenz96 LETKF code is originally developed by Shigenori Otsuka ([https://github.com/otsuka-shigenori/da_demo](https://github.com/otsuka-shigenori/da_demo))  
 The codes with Keras Tensorflow is developed by Shlok Mohta. 
 
 ## Run the experiment 

@@ -1,6 +1,6 @@
 # MLBiasCorrection
 
-This repository contains the codes for a paper by Amemiya, Shlok, and Miyoshi submitted to *Journal of Advances in Modeling Earth Systems*.
+This repository contains the codes for a paper by [Amemiya, Shlok, and Miyoshi](https://doi.org/10.1029/2022MS003164) (2023), *Journal of Advances in Modeling Earth Systems*.
 
 ## Acknowledgement
 The main part of the Lorenz96 LETKF code is originally developed by Shigenori Otsuka ([https://github.com/otsuka-shigenori/da_demo](https://github.com/otsuka-shigenori/da_demo))  

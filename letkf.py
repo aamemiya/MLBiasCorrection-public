@@ -4,7 +4,7 @@ import numpy as np
 import numpy.linalg as LA             
 
 class LETKF:
-  def __init__(self, model, n = 40, f = 8, dt = 0.005, amp_const = 0, k = 20, localization_cut = 5, localization_len = 3, inflation = 1.0):
+  def __init__(self, model, n = 40, f = 8, dt = 0.005, amp_const = 0, k = 20, localization_cut = 5, localization_len = 3, inflation = 1.0, add_inflation = 0):
     """
     model: model constructor
     n: model size
@@ -16,6 +16,7 @@ class LETKF:
     localization_cut: localization patch cutoff radius
     localization_len: localization patch length scale (exp(-0.5*(r/len)**2))
     inflation: multiplicative covariance inflation
+    add_inflation: additive covariance inflation
     """
     self.n = n
     self.f = f
@@ -25,6 +26,9 @@ class LETKF:
     self.localization_len = localization_len
     self.localization_cut = localization_cut
     self.infl = math.sqrt(inflation)
+   
+    self.add_infl = add_inflation
+
     # models
     self.ensemble = []
     for i in range(k):
@@ -152,6 +156,12 @@ class LETKF:
 
     w = u @ d_inv @ u.T @ hzT_r_inv @ y_hx  # mean update
     w += (u @ d_inv_sqrt @ u.T) * math.sqrt(self.k - 1) # ensemble update
-    x_a = (z @ w) * self.infl + x # covariance inflation is included here
+
+    if self.add_infl > 0:
+       z_add = np.random.randn(self.k)
+       z_add = z_add - np.mean(z_add)
+       x_a = (z @ w) * self.infl + z_add * self.add_infl + x # additive/covariance inflation is included here
+    else : 
+       x_a = (z @ w) * self.infl + x # covariance inflation is included here
     return x_a
 

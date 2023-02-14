@@ -7,8 +7,7 @@ import matplotlib.pyplot as plt
 #------------------------------------------------
 ### config
 
-
-ncdir  = '../DATA/coupled_A13/obs_010/LSTM_mshlok'
+ncdir  = '../DATA_test/coupled_A13/0001/obs_p8_010/LSTM'
 
 #------------------------------------------------
 
@@ -37,7 +36,7 @@ plt.ylabel('forecast - analysis',fontsize=12)
 #plt.axis('equal')
 #plt.axis('square')
 
-plt.ylim(-0.6,0.6)
+plt.ylim(-0.4,0.4)
 plt.xlim(-15,20)
 
 plt.tick_params(axis='both', which='major', labelsize=12)

@@ -30,15 +30,15 @@ loc_scale  = param.param_letkf['localization_length_scale']
 loc_cutoff = param.param_letkf['localization_length_cutoff']
 fact_infl  = param.param_letkf['inflation_factor'] 
 miss = param.param_letkf['missing_value']
+fact_infl_add  = param.param_letkf['additive_inflation_factor'] 
 
 bc_type = param.param_bc['bc_type']
 bc_alpha = param.param_bc['alpha']
 bc_gamma = param.param_bc['gamma']
 
-amp = 0 
-
 intv_nature=int(dt_nature/dt)
 intv_assim=int(dt_assim/dt)
+
 #------------------------------------------------
 
 def qc(h,data,r) :
@@ -59,13 +59,13 @@ def qc(h,data,r) :
 #------------------------------------------------
 
 
-letkf = letkf.LETKF(model.Lorenz96, nx, f, amp_const = amp, k = nmem, localization_len = loc_scale, localization_cut = loc_cutoff , inflation = fact_infl)
+letkf = letkf.LETKF(model.Lorenz96, nx, f, k = nmem, localization_len = loc_scale, localization_cut = loc_cutoff , inflation = fact_infl, add_inflation = fact_infl_add)
 # initial ensemble perturbation
 for i in range(nmem):
   nc = netCDF4.Dataset(expdir + '/spinup/init'+ '{0:02d}'.format(i) + '.nc','r',format='NETCDF4')
   x0 = np.array(nc.variables['v'][:], dtype=type(np.float64)).astype(np.float32)
   nc.close 
-  letkf.ensemble[i].x = x0
+  letkf.ensemble[i].x = x0.copy()
 
 # load nature and observation data
 nc = netCDF4.Dataset(expdir + '/' + obsdir + '/obs.nc','r',format='NETCDF4')
@@ -127,7 +127,6 @@ for step in range(min(ntime_nature,length-1)):
         xf.append(letkf.members())
         xfmtemp=letkf.mean()
         xfm.append(xfmtemp)
-
      
         xa.append(letkf.analysis(*qc(h, obs[step_obs], r)))
         xamtemp=letkf.mean()
@@ -146,6 +145,7 @@ for step in range(min(ntime_nature,length-1)):
           print('time ', round(time_obs[step_obs],4),' RMSE ', round(rmse,4), ' f-a ', round(dfa,4), ' f-a(raw) ', round(dfar,4), ' f-n(raw) ', round(dfn,4), ' SPRD ', round(sprd,4) )
 #          print('time ', round(time_obs[step_obs],4),' RMSE ', rmse,' SPRD ',sprd)
         icount = icount+1
+
         if (icount > 0):
           rmse_mean = (rmse + (icount-1) * rmse_mean)  / icount
 #          if ( round((icount-1)/1,4).is_integer() ):

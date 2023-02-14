@@ -2,88 +2,133 @@
 import os
 import numpy as np
 import netCDF4
-#import param
 import matplotlib.pyplot as plt
-
+from matplotlib.patches import Rectangle
 #------------------------------------------------
 ### config
-#nx  = param.param_model['dimension'] 
 nx=8
-#expdir = param.param_exp['expdir']
-#obsdir = param.param_exp['obs_type']
-#dadir  = param.param_exp['da_type']
 
-expdir='../DATA/coupled_A13'
+expdir='../DATA_test/coupled_A13/0001'
 
-#obsdir='obs_001_020'
-obsdir='obs_p6_010'
+obsdir='obs_p8_010'
+obsdir2='obs_p6_010'
+#
+tfile='./data/loss_p8.txt'
 
-#dadir=('nocorr','LD_tanh10_5')
-#dadir=('nocorr','linear_offline')
-dadir=('nocorr','linear','linear_4','Dense_single','LSTM')
-#dadir=('nocorr','linear_offline','D_tanh_5','L2D_tanh_5')
-#dadir=('nocorr','linear_offline','D_tanh_3','L2D_tanh_3','D_tanh_5','L2D_tanh_5')
-#dadir=('nocorr','CLD_tanh5_5','CLD_tanh7_5','CLD_tanh10_5')
-
-legends = ('nocorr','linear','4th poly','Dense','LSTM')
-#legends = ('nocorr','linear','Dense-5','LSTM-5','Dense-3','LSTM-3')
-#lstyles = ('solid','dotted',(0,(1,4)),'dashed','dashdot')
-#lstyles = ('solid','dashdot',(0,(3,5,1,5)),(0,(3,2,1,2)))
-lstyles = ('solid','dotted','dashdot',(0,(3,5,1,5)),(0,(3,2,1,2)))
-
+tlen=29899
+tsta=100
+tend=tsta+tlen
 
 #------------------------------------------------
 
-nexp=len(dadir)
-
-rmse=[]
-sprd=[]
-rmse_plot=[]
-sprd_plot=[]
+titles=['nocorr','linear','linear4','Dense_single','Dense','SimpleRNN','GRU','LSTM']
+dadir=['nocorr','linear','linear4','Dense_single','Dense','SimpleRNN','GRU','LSTM']
 
 
-# load nature and observation data
+values=[]
+errors=[]
+values2=[]
+errors2=[]
+colors=[]
+vdifs=[]
+vdifs2=[]
+plows=[]
+phighs=[]
+plows2=[]
+phighs2=[]
+
+nexp=len(titles)
+
+ncn = netCDF4.Dataset(expdir + '/nature.nc','r',format='NETCDF4')
+nature=np.array(ncn.variables['v'][:], dtype=type(np.float64)).astype(np.float32)
 for i in range(nexp):
-  nc = netCDF4.Dataset(expdir + '/' + obsdir +'/' + dadir[i] + '/stats.nc','r',format='NETCDF4')
-  rmse.append(np.array(nc.variables['rmse'][:], dtype=type(np.float64)).astype(np.float32))
-  sprd.append(np.array(nc.variables['sprd'][:], dtype=type(np.float64)).astype(np.float32))
+  nc = netCDF4.Dataset(expdir + '/' + obsdir +'/' + dadir[i] + '/assim.nc','r',format='NETCDF4')
+  nc2 = netCDF4.Dataset(expdir + '/' + obsdir2 +'/' + dadir[i] + '/assim.nc','r',format='NETCDF4')
+  vam=np.array(nc.variables['vam'][:], dtype=type(np.float64)).astype(np.float32)
+  vam2=np.array(nc2.variables['vam'][:], dtype=type(np.float64)).astype(np.float32)
+  vdif=vam[tsta:tend]-nature[tsta:tend]
+  vdif=np.sqrt(np.mean(vdif**2,axis=-1))
+  vdif2=vam2[tsta:tend]-nature[tsta:tend]
+  vdif2=np.sqrt(np.mean(vdif2**2,axis=-1))
+
+
+  vdifs.append(vdif)
+  vdifs2.append(vdif2)
+
   if (i == 0): 
     time = np.array(nc.variables['t'][:], dtype=type(np.float64)).astype(np.float32)
   nc.close 
-  rmse_plot.append(np.mean(rmse[i],axis=0))
-  sprd_plot.append(np.mean(sprd[i],axis=0))
+
+  if np.mod(i,2) == 0 : 
+    colors.append('grey')
+  else:
+    colors.append('lightgrey')
+
+ncn.close
+
+vdifs=np.array(vdifs)
+vdifs2=np.array(vdifs2)
+
+for i in range(1,nexp): 
+  vdifs[i] = vdifs[i]/vdifs[0]
+  values.append(np.mean(vdifs[i]))
+  errors.append(np.std(vdifs[i]))
+  vdifs2[i] = vdifs2[i]/vdifs2[0]
+  values2.append(np.mean(vdifs2[i]))
+  errors2.append(np.std(vdifs2[i]))
+  plows.append(np.percentile(vdifs[i],10.))
+  phighs.append(np.percentile(vdifs[i],90.))
+  plows2.append(np.percentile(vdifs2[i],10.))
+  phighs2.append(np.percentile(vdifs2[i],90.))
 
 
-ntime=len(time)
 
-doubling_time=0.2*2.1 ### 2.1 day
+#  print(legends[i],np.mean(vdifs[i]),np.std(vdifs[i]))
+#quit()
 
-#refy=np.array((1,max(rmse_plot[0])))
-#refx=np.array((0,doubling_time*np.log2(refy[1])))
 
-smp_e=1
-nplt=40
-###
-plt.figure()
-plt.yscale('log')
-#plt.scatter(test_labels, test_predictions)
-#plt.scatter(fcst[ntime-100:ntime,1], anal[ntime-100:ntime,1]-fcst[ntime-100:ntime,1])
-for i in range(nexp):
-  plt.plot(time[:nplt], rmse_plot[i][:nplt],label=legends[i],linestyle=lstyles[i])
-# plt.plot(time, sprd_plot)
+values=np.array(values)
+errors=np.array(errors)
+values2=np.array(values2)
+errors2=np.array(errors2)
+print(np.arange(1.0,float(nexp)))
+print(np.array(values))
+print(np.array(errors))
+print(np.array(titles))
+print(np.array(colors))
+pcts=[]
+pcts.append(np.array(values)-np.array(plows))
+pcts.append(np.array(phighs)-np.array(values))
+pcts=np.array(pcts)
+pcts2=[]
+pcts2.append(np.array(values)-np.array(plows2))
+pcts2.append(np.array(phighs2)-np.array(values))
+pcts2=np.array(pcts2)
 
-plt.legend(bbox_to_anchor=(0.99,0.01), loc='lower right', borderaxespad=0,fontsize=14)
-#plt.plot(refx, refy,color='black',linestyle='dashed')
-plt.xlabel('time')
-plt.ylabel('RMSE')
-#plt.axis('equal')
-#plt.axis('square')
-plt.xlim()
-plt.ylim([0.09,8.0])
-plt.yticks([0.1,0.2,0.5,1,2,5],['0.1','0.2','0.5','1.0','2.0','5.0'])
-#plt.xlim([0,plt.xlim()[1]])
-#plt.ylim([0,plt.ylim()[1]])
-#_ = plt.plot([-100, 100], [-100, 100])
-plt.savefig('png/fig13.png', dpi = 400, bbox='tight')
-###
 
+fig, ax = plt.subplots()
+
+#ax.add_patch(Rectangle(xy=(2.5,0.2),width=2.0,height=1.0 , facecolor='gainsboro', edgecolor=None ))
+plt.axvline(x=4.5, color='gray', linestyle='--', linewidth=1)
+plt.axvline(x=2.5, color='gray', linestyle='--', linewidth=1)
+
+#ax.bar(np.arange(1.0,float(nexp)), np.array(values[:]), width=0.5, color=colors[1:])
+#ax.errorbar(np.arange(1.0,float(nexp)), np.array(values[:]), fmt="x",yerr = np.array(errors[:]), capsize=2.0, ecolor='black', markeredgecolor = "red", linestyle="")
+#ax.errorbar(np.arange(1.1,float(nexp)+0.1), np.array(values2[:]), fmt="x",yerr = np.array(errors2[:]), capsize=2.0, ecolor='grey', markeredgecolor = "red", linestyle="")
+ax.errorbar(np.arange(1.0,float(nexp)), np.array(values[:]), fmt="x",yerr = pcts, capsize=2.0, ecolor='black', markeredgecolor = "red", linestyle="")
+ax.errorbar(np.arange(1.1,float(nexp)+0.1), np.array(values2[:]), fmt="x",yerr = pcts2, capsize=2.0, ecolor='dimgrey', markeredgecolor = "red", linestyle="")
+
+
+plt.axhline(y=1, color='k', linestyle='--')
+
+ax.set_ylabel('Relative analysis error',fontsize=12)
+
+ax.set_ylim(0.2,1.2)
+ax.set_xlim(0.5,float(nexp)-0.5)
+
+ax.set_xticklabels(titles[:], rotation= 30, ha="right")
+ax.tick_params(axis='both', which='major', labelsize=12)
+plt.subplots_adjust(bottom=0.25)
+
+fig.savefig('png/fig13.png')
+#

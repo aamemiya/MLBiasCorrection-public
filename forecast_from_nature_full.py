@@ -41,8 +41,6 @@ bc_gamma = param.param_bc['gamma']
 intv_nature=int(dt_nature/dt)
 intv_assim=int(dt_assim/dt)
 
-amp = 0
-
 dadir='fcst_from_nature'
 tag='fullmodel'
 amp_perturb=0.1
@@ -51,14 +49,9 @@ length=80
 nsmpmax=100
 intv=250
 inittime=4501   ### spinup
-if (dt_assim == 0.2):
-  length=20
-  nsmpmax=100
-  intv=60
-  inittime=1001   ### spinup  
 #------------------------------------------------
 
-letkf = letkf.LETKF(model.Lorenz96_coupled, nx, nxx, f, dt = dt, h= h, b = b, c= c , amp_const = amp, k = nmem, localization_len = loc_scale, localization_cut = loc_cutoff , inflation = fact_infl)
+letkf = letkf.LETKF(model.Lorenz96_coupled, nx, nxx, f, dt = dt, h= h, b = b, c= c, k = nmem, localization_len = loc_scale, localization_cut = loc_cutoff , inflation = fact_infl)
 
 nc = netCDF4.Dataset(expdir + '/nature_full.nc','r',format='NETCDF4')
 nature = np.array(nc.variables['v'][:], dtype=type(np.float64)).astype(np.float32)
@@ -92,7 +85,7 @@ while ((inittime+length <= assim_length) and (ismp < nsmpmax)) :
   bc=BC.BiasCorrection(bc_type,nx,bc_alpha,bc_gamma)
 
  ### spinup of LSTM
-  if bc_type is 'tf':
+  if bc_type == 'tf':
     for i in range(100):  
       xftemp = bc.correct(analysis[inittime-99+i,:,:])
  

@@ -1,50 +1,15 @@
 #!/bin/bash
 
-#obstype="obs_p4_010"
-obstype="obs_p6_010"
 
-loc="../DATA/coupled_A13/"$obstype"/nocorr/assim.nc"
-
+exptype="optimize"
+loc="../DATA/coupled_A13/obs_p8_010/nocorr/assim.nc"
+id_exp="optuna_test"
 recurrent=0
 nntype="Dense_single"
 
-mkdir -p auto_output/result/draft/$obstype/$nntype
+python Exp.py -id $id_exp --use_optuna 1 --t "optimize" -osql $id_exp -nt 10 -e 10 -l 1 -ts 5 -ncdf_loc $loc -tb 32768 -nbs 8 -rec $recurrent -vb 8192 -norm 0 -d 1 -afm 0 --network_type "$nntype" -sprd 1
 
-for round in `seq 10` ;do
-
-echo "$nntype $round ..." >> log_progress 
-
-id_exp=$obstype"/draft/"$nntype"_"$round
-
-python Exp.py -id $id_exp --enable_optuna_mlflow 0 --t "optimize" -osql $id_exp -nt 30 -e 100 -l 1 -ts 5 -ncdf_loc $loc -tb 32768 -nbs 8 -mr $recurrent -vb 8192 -norm 0 -d 1 -afm 0 -type "$nntype" -sprd 1    
-line=`cat result.txt` 
-
-echo $round $line >> auto_output/result/draft/$obstype/$nntype/result.txt
-
-done
-
-recurrent=1
-for nntype in Dense SimpleRNN GRU LSTM ; do
-
-mkdir auto_output/result/draft/$obstype/$nntype
-
-for round in `seq 10` ;do
-
-echo "$nntype $round ..." >> log_progress 
-
-id_exp=$obstype"/draft/"$nntype"_"$round
-
-python Exp.py -id $id_exp --enable_optuna_mlflow 0 --t "optimize" -osql $id_exp -nt 30 -e 200 -l 1 -ts 5 -ncdf_loc $loc -tb 32768 -nbs 8 -mr $recurrent -vb 8192 -norm 0 -d 1 -afm 0 -type "$nntype" -sprd 1 
-line=`cat result.txt` 
-echo $round $line >> auto_output/result/draft/$obstype/$nntype/result.txt
-done
-
-done
-
-echo "done." >> log_progress 
-
-
-#usage: Exp.py [-h] [--id_exp ID_EXP] [--enable_optuna_mlflow {0,1}]
+#usage: Exp.py [-h] [--id_exp ID_EXP] [--use_optuna_mlflow {0,1}]
 #              [--t {optimize,best,p_best}] [--m_recu {0,1}]
 #              [--epochs EPOCHS] [--num_trials NUM_TRIALS]
 #              [--netcdf_dataset NETCDF_DATASET] 
@@ -59,12 +24,12 @@ echo "done." >> log_progress
 #  -h, --help            show this help message and exit
 #  --id_exp ID_EXP, -id ID_EXP 
 #                        Experiment name / Optuna Study name
-#  --enable_optuna_mlflow {0,1}
-#                        Run with optuna-mlflow for automatic optimization or without them as single trial
+#  --use_optuna_mlflow {0,1}
+#                        Run with optuna for automatic optimization or without them as single trial
 #  --t {optimize,best,p_best}
 #                        Choose between optimization or training best parameter
-#  --m_recu {0,1}, -mr {0,1}
-#                        Use LSTM layers or not
+#  --recurrent {0,1}, -rec {0,1}
+#                        Use recurrent layers or not
 #  --epochs EPOCHS, -e EPOCHS
 #                        Num of epochs for training
 #  --num_trials NUM_TRIALS, -nt NUM_TRIALS

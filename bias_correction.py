@@ -13,9 +13,9 @@ class BiasCorrection:
       self.alpha = alpha
       self.gamma = gamma
       self.dim_y = dim_y
-    if mode is 'const':
+    if mode == 'const':
       self.constb = np.zeros(dim_y, dtype=np.float64)
-    if mode is 'linear':
+    if mode == 'linear':
       self.dim_y_loc = 5 
 #      self.dim_y_loc = 1 + 2 * param.param_letkf['localization_length_cutoff']
       self.constb = np.zeros(dim_y, dtype=np.float64)
@@ -26,7 +26,7 @@ class BiasCorrection:
         for j in range(dim_y):
           self.constb[j] = arrayw[0,0]
           self.coeffw[j,:] = arrayw[1:self.dim_y_loc+1,0] 
-    if mode is 'linear_custom':
+    if mode == 'linear_custom':
       n_order=4
       self.dim_y_loc = 5 
 #      self.dim_y_loc = 1 + 2 * param.param_letkf['localization_length_cutoff']
@@ -39,7 +39,7 @@ class BiasCorrection:
         arrayw = np.array(nc.variables['w'][:], dtype=type(np.float64)).astype(np.float32)
         for j in range(dim_y):
           self.coeffw[j,0:self.dim_p] = arrayw[0:self.dim_p,0] 
-    if mode is 'tf':
+    if mode == 'tf':
       self.tfm = bctf.BCTF(param.param_model['dimension'])
 
   def custom_basisf(self,y_in_loc):
@@ -64,16 +64,16 @@ class BiasCorrection:
   def train(self,y_in,y_out):
     if self.mode is None:
       return    
-    elif self.mode is 'const':
+    elif self.mode == 'const':
       self.constb = (1-self.gamma) * self.constb 
       self.constb = self.constb + self.alpha * (y_out - y_in)
-    elif self.mode is 'linear':
+    elif self.mode == 'linear':
       self.constb = (1-self.gamma) * self.constb 
       self.coeffw = (1-self.gamma) * self.coeffw 
       for j in range(self.dim_y):
         self.constb[j] = self.constb[j] + self.alpha * (y_out[j] - y_in[j])
         self.coeffw[j] = self.coeffw[j] + self.alpha * self.localize(y_in,j) * (y_out[j] - y_in[j]) / (1 + (self.localize(y_in,j)**2).sum()) 
-    elif self.mode is 'linear_custom':
+    elif self.mode == 'linear_custom':
       self.coeffw = (1-self.gamma) * self.coeffw 
       for j in range(self.dim_y):
         self.custom_basisf(self.localize(y_in,j))   
@@ -83,24 +83,24 @@ class BiasCorrection:
   def correct(self,y_in):  
     if self.mode is None:
       y_out = y_in 
-    elif self.mode is 'const':
-      if y_in.ndim is 2:
+    elif self.mode == 'const':
+      if y_in.ndim == 2:
         for j in range (y_in.shape[0]):
           y_out[j] = y_in[j] + self.constb
       else:
         y_out = y_in + self.constb
-    elif self.mode is 'linear':
+    elif self.mode == 'linear':
       y_out = np.zeros(y_in.shape,dtype=np.float64)
-      if y_in.ndim is 2:
+      if y_in.ndim == 2:
         for i in range (y_in.shape[0]):
           for j in range(self.dim_y):
             y_out[i,j] = y_in[i,j] + self.constb[j] + np.dot(self.coeffw[j],self.localize(y_in[i,:],j))
       else:
         for j in range(self.dim_y):
           y_out[j] = y_in[j] + self.constb[j] + np.dot(self.coeffw[j],self.localize(y_in,j))
-    elif self.mode is 'linear_custom':
+    elif self.mode == 'linear_custom':
       y_out = np.zeros(y_in.shape,dtype=np.float64)
-      if y_in.ndim is 2:
+      if y_in.ndim == 2:
         for i in range (y_in.shape[0]):
           for j in range(self.dim_y):
             self.custom_basisf(self.localize(y_in[i,:],j))   
@@ -109,8 +109,8 @@ class BiasCorrection:
         for j in range(self.dim_y):
           self.custom_basisf(self.localize(y_in,j))   
           y_out[j] = y_in[j] + np.dot(self.coeffw[j],self.pval)
-    elif self.mode is 'tf':
-      if y_in.ndim is not 1:
+    elif self.mode == 'tf':
+      if y_in.ndim != 1:
         y_out = self.tfm.predict(np.ravel(y_in)).reshape(y_in.shape)
       else:
         y_out = self.tfm.predict(y_in)

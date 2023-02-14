@@ -31,12 +31,11 @@ loc_scale  = param.param_letkf['localization_length_scale']
 loc_cutoff = param.param_letkf['localization_length_cutoff']
 fact_infl  = param.param_letkf['inflation_factor'] 
 miss = param.param_letkf['missing_value']
+fact_infl_add  = param.param_letkf['additive_inflation_factor'] 
 
 bc_type = param.param_bc['bc_type']
 bc_alpha = param.param_bc['alpha']
 bc_gamma = param.param_bc['gamma']
-
-amp = 0 
 
 intv_nature=int(dt_nature/dt)
 intv_assim=int(dt_assim/dt)
@@ -44,9 +43,8 @@ intv_assim=int(dt_assim/dt)
 
 length = 2000 ### test
 
-fact_infl=float(sys.argv[1])
-
-#fact_infl=2.0
+fact_infl=1.0
+fact_infl_add=float(sys.argv[1])
 
 #------------------------------------------------
 
@@ -70,7 +68,7 @@ def qc(h,data,r) :
 
 
 
-letkf = letkf.LETKF(model.Lorenz96, nx, f, amp_const = amp, k = nmem, localization_len = loc_scale, localization_cut = loc_cutoff , inflation = fact_infl)
+letkf = letkf.LETKF(model.Lorenz96, nx, f, k = nmem, localization_len = loc_scale, localization_cut = loc_cutoff , inflation = fact_infl, add_inflation = fact_infl_add))
 # initial ensemble perturbation
 for i in range(nmem):
   nc = netCDF4.Dataset(expdir + '/spinup/init'+ '{0:02d}'.format(i) + '.nc','r',format='NETCDF4')

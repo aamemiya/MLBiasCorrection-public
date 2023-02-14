@@ -1,4 +1,7 @@
 DATA
+__pycache__
 tf/__pycache__
+tf/sql
 tf/n_experiments
+tf/*.csv
 

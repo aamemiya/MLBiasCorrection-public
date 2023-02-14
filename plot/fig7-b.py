@@ -7,8 +7,7 @@ import matplotlib.pyplot as plt
 #------------------------------------------------
 ### config
 
-
-ncdir  = '../DATA/coupled_A13/obs_010/LSTM_mshlok'
+ncdir  = '../DATA_test/coupled_A13/0001/obs_p8_010/LSTM'
 
 #------------------------------------------------
 
@@ -32,7 +31,7 @@ nplt=200
 plt.figure()
 #plt.scatter(test_labels, test_predictions)
 #plt.scatter(fcst[ntime-100:ntime,1], anal[ntime-100:ntime,1]-fcst[ntime-100:ntime,1])
-plt.scatter(fcst[ntime-nplt:ntime,smp_e], fcst_raw[ntime-nplt:ntime,smp_e]-anal[ntime-nplt:ntime,smp_e])
+plt.scatter(fcst[ntime-nplt:ntime,smp_e], fcst_raw[ntime-nplt:ntime,smp_e]-nature[ntime-nplt:ntime,smp_e])
 #plt.scatter(fcst[ntime-nplt:ntime,smp_e], fcst_raw[ntime-nplt:ntime,smp_e]-fcst[ntime-nplt:ntime,smp_e], c='red')
 plt.scatter(fcst[ntime-nplt:ntime,smp_e], fcst[ntime-nplt:ntime,smp_e]-nature[ntime-nplt:ntime,smp_e], c='red')
 plt.axhline(y=0, color='k', linestyle='--')
@@ -41,7 +40,7 @@ plt.ylabel('forecast - truth',fontsize=12)
 #plt.axis('equal')
 #plt.axis('square')
 
-plt.ylim(-0.6,0.6)
+plt.ylim(-0.4,0.4)
 plt.xlim(-15,20)
 
 plt.tick_params(axis='both', which='major', labelsize=12)

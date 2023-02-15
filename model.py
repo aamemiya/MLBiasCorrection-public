@@ -100,19 +100,19 @@ class Lorenz96_add:
     self.tmpdx   *= self.tmpx[1:(m - 2)]
     self.tmpdx   -= self.tmpx[2:(m - 1)]
     self.tmpdx   += self.f
-    if self.mode is "const":
+    if self.mode == "const":
       self.tmpdx   += self.amp 
-    if self.mode is "sin":
+    if self.mode == "sin":
       self.tmpdx   += self.amp * np.sin(2*np.pi*np.arange(n)/n)
-    if self.mode is "sint":
+    if self.mode == "sint":
       self.tmpdx   += self.amp * np.sin(2*np.pi*self.t/self.amp2)
-    if self.mode is "linear":
+    if self.mode == "linear":
       self.tmpdx   += self.amp * self.tmpx[2:(m - 1)]
-    if self.mode is "third_order":
+    if self.mode == "third_order":
       self.tmpdx   += self.amp * (self.tmpx[2:(m - 1)] - 1/(self.amp2)**2 * self.tmpx[2:(m - 1)]**3)
-    if self.mode is "step":
+    if self.mode == "step":
       self.tmpdx   += self.amp * np.heaviside( self.tmpx[2:(m - 1)] - self.amp2, 0 )
-    if self.mode is "advection":
+    if self.mode == "advection":
       self.tmpdx   += self.amp * (self.tmpx[3:m] - self.tmpx[0:(m - 3)]) * self.tmpx[1:(m - 2)]
     return self.tmpdx
 

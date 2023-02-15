@@ -2,14 +2,14 @@
 
 
 exptype="optimize"
-loc="../DATA/coupled_A13/obs_010/nocorr/assim.nc"
+loc="../DATA/coupled_A13/obs_p8_010/nocorr/assim.nc"
 id_exp="test"
 recurrent=0
 nntype="Dense_single"
 
-python Exp.py -id $id_exp --enable_optuna_mlflow 0 --t "optimize" -osql $id_exp -nt 30 -e 100 -l 1 -ts 5 -ncdf_loc $loc -tb 32768 -nbs 8 -mr $recurrent -vb 8192 -norm 0 -d 1 -afm 0 -type "$nntype" -sprd 1    
+python Exp.py -id $id_exp --use_optuna 0 --t "optimize" -osql $id_exp -nt 30 -e 10 -l 1 -ts 5 -ncdf_loc $loc -tb 32768 -nbs 8 -rec $recurrent -vb 8192 -norm 0 -d 1 -afm 0 --network_type "$nntype" -sprd 1
 
-#usage: Exp.py [-h] [--id_exp ID_EXP] [--enable_optuna_mlflow {0,1}]
+#usage: Exp.py [-h] [--id_exp ID_EXP] [--use_optuna_mlflow {0,1}]
 #              [--t {optimize,best,p_best}] [--m_recu {0,1}]
 #              [--epochs EPOCHS] [--num_trials NUM_TRIALS]
 #              [--netcdf_dataset NETCDF_DATASET] 
@@ -24,12 +24,12 @@ python Exp.py -id $id_exp --enable_optuna_mlflow 0 --t "optimize" -osql $id_exp 
 #  -h, --help            show this help message and exit
 #  --id_exp ID_EXP, -id ID_EXP 
 #                        Experiment name / Optuna Study name
-#  --enable_optuna_mlflow {0,1}
-#                        Run with optuna-mlflow for automatic optimization or without them as single trial
+#  --use_optuna_mlflow {0,1}
+#                        Run with optuna for automatic optimization or without them as single trial
 #  --t {optimize,best,p_best}
 #                        Choose between optimization or training best parameter
-#  --m_recu {0,1}, -mr {0,1}
-#                        Use LSTM layers or not
+#  --recurrent {0,1}, -rec {0,1}
+#                        Use recurrent layers or not
 #  --epochs EPOCHS, -e EPOCHS
 #                        Num of epochs for training
 #  --num_trials NUM_TRIALS, -nt NUM_TRIALS

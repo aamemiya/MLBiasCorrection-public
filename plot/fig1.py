@@ -5,13 +5,11 @@ from matplotlib.offsetbox import AnchoredText
 
 import numpy as np
 import os
-import shutil
-from tf import network_arch as net
 
 ncdir="../DATA/coupled_A13"
 
 # load nature and observation data
-nc = netCDF4.Dataset(ncdir + '/nature_full.nc','r',format='NETCDF4')
+nc = netCDF4.Dataset(ncdir + '/nature_full_fast.nc','r',format='NETCDF4')
 v = np.array(nc.variables['v'][:], dtype=type(np.float64)).astype(np.float32)
 vv = np.array(nc.variables['vv'][:], dtype=type(np.float64)).astype(np.float32)
 time = np.array(nc.variables['t'][:], dtype=type(np.float64)).astype(np.float32)
@@ -23,11 +21,13 @@ ntime=len(time)
 fig,ax = plt.subplots(nrows=2,sharex='all')
 
 element = 0
+elementy = 16
+
 
 vmin=-10.0
 vmax= 20.0
-vvmin=-1.0
-vvmax= 1.0
+vvmin=-1.5
+vvmax= 1.5
 
 length=1000
 
@@ -38,7 +38,7 @@ ax[0].plot(time[0:length],v[-length-1:-1,element], color='black', linewidth=2)
 ax[0].set_title('(a) Slow variable',loc='left')
 
 ax[1].set_ylim(vvmin,vvmax)
-ax[1].plot(time[0:length],vv[-length-1:-1,element], color='grey', linewidth=2)
+ax[1].plot(time[0:length],vv[-length-1:-1,elementy], color='grey', linewidth=2)
 #ax[1].legend(loc='upper right')
 ax[1].set_title('(b) Fast variable',loc='left')
 

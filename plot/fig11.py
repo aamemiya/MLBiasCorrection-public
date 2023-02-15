@@ -7,29 +7,22 @@ import matplotlib.pyplot as plt
 
 #------------------------------------------------
 ### config
-#nx  = param.param_model['dimension'] 
 nx=8
-#expdir = param.param_exp['expdir']
-#obsdir = param.param_exp['obs_type']
-#dadir  = param.param_exp['da_type']
 
 expdir='../DATA/coupled_A13'
 
-#obsdir='obs_001_020'
-obsdir='obs_p6_010'
+obsdir='obs_p8_010'
+#obsdir='obs_p6_010'
 
-#dadir=('nocorr','LD_tanh10_5')
-#dadir=('nocorr','linear_offline')
-dadir=('nocorr','linear','linear_4','Dense_single','LSTM')
-#dadir=('nocorr','linear_offline','D_tanh_5','L2D_tanh_5')
-#dadir=('nocorr','linear_offline','D_tanh_3','L2D_tanh_3','D_tanh_5','L2D_tanh_5')
-#dadir=('nocorr','CLD_tanh5_5','CLD_tanh7_5','CLD_tanh10_5')
+#dadir=('nocorr','linear','linear4')
+dadir=['nocorr','linear','linear4','Dense_single','LSTM']
 
-legends = ('nocorr','linear','4th poly','Dense','LSTM')
-#legends = ('nocorr','linear','Dense-5','LSTM-5','Dense-3','LSTM-3')
+legends = ['nocorr','linear','4th poly','Dense','LSTM']
+#legends = ('nocorr','linear','4th poly')
 #lstyles = ('solid','dotted',(0,(1,4)),'dashed','dashdot')
 #lstyles = ('solid','dashdot',(0,(3,5,1,5)),(0,(3,2,1,2)))
-lstyles = ('solid','dotted','dashdot',(0,(3,5,1,5)),(0,(3,2,1,2)))
+lstyles = ['solid','dotted','dashdot',(0,(3,5,1,5)),(0,(3,2,1,2))]
+#lstyles = ('solid','dotted','dashdot')
 
 
 #------------------------------------------------
@@ -79,7 +72,7 @@ plt.ylabel('RMSE')
 #plt.axis('equal')
 #plt.axis('square')
 plt.xlim()
-plt.ylim([0.09,8.0])
+plt.ylim([0.05,8.0])
 plt.yticks([0.1,0.2,0.5,1,2,5],['0.1','0.2','0.5','1.0','2.0','5.0'])
 #plt.xlim([0,plt.xlim()[1]])
 #plt.ylim([0,plt.ylim()[1]])

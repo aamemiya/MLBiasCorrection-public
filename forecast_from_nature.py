@@ -3,11 +3,10 @@ import os
 import sys
 import math
 import numpy as np
-import numpy.linalg as LA
 import netCDF4
 import model
 import letkf
-import param_1 as param
+import param as param
 import bias_correction as BC
 
 #------------------------------------------------
@@ -37,8 +36,6 @@ bc_gamma = param.param_bc['gamma']
 intv_nature=int(dt_nature/dt)
 intv_assim=int(dt_assim/dt)
 
-amp = 0 
-
 dadir='fcst_from_nature'
 tag='nocorr'
 amp_perturb=0.1
@@ -47,24 +44,19 @@ length=80
 nsmpmax=100
 intv=250
 inittime=4501   ### spinup
-if (dt_assim == 0.2):
-  length=20
-  nsmpmax=100
-  intv=60
-  inittime=1001   ### spinup  
 #------------------------------------------------
 
-letkf = letkf.LETKF(model.Lorenz96, nx, f, amp_const = amp, k = nmem, localization_len = loc_scale, localization_cut = loc_cutoff , inflation = fact_infl)
+letkf = letkf.LETKF(model.Lorenz96, nx, f, k = nmem, localization_len = loc_scale, localization_cut = loc_cutoff , inflation = fact_infl)
 
-nc = netCDF4.Dataset(expdir + '/nature_full.nc','r',format='NETCDF4')
+nc = netCDF4.Dataset(expdir + '/nature.nc','r',format='NETCDF4')
 nature = np.array(nc.variables['v'][:], dtype=type(np.float64)).astype(np.float32)
-nature_vv = np.array(nc.variables['vv'][:], dtype=type(np.float64)).astype(np.float32)
 time_nature = np.array(nc.variables['t'][:], dtype=type(np.float64)).astype(np.float32)
 nc.close 
 
 # initial ensemble perturbation
 nc = netCDF4.Dataset(expdir + '/' + obsdir + '/nocorr/assim.nc','r',format='NETCDF4')
 analysis = np.array(nc.variables['va'][:], dtype=type(np.float64)).astype(np.float32)
+analysis_mean = np.array(nc.variables['vam'][:], dtype=type(np.float64)).astype(np.float32)
 time_assim = np.array(nc.variables['t'][:], dtype=type(np.float64)).astype(np.float32)
 nc.close
 
@@ -87,9 +79,10 @@ while ((inittime+length <= assim_length) and (ismp < nsmpmax)) :
   bc=BC.BiasCorrection(bc_type,nx,bc_alpha,bc_gamma)
 
  ### spinup of LSTM
-  if bc_type is 'tf':
+  if bc_type == 'tf':
     for i in range(100):  
       xftemp = bc.correct(analysis[inittime-99+i,:,:])
+#      xftemp = bc.correct(nature[inittime-99+i,:,:])
  
   xf=[]
   xfm=[]
@@ -142,16 +135,10 @@ while ((inittime+length <= assim_length) and (ismp < nsmpmax)) :
       rmsetemp = math.sqrt(((letkf.mean()-nature[step+1])**2).sum() /nx)
       rmseraw = math.sqrt(((xfmtempb-nature[step+1])**2).sum() /nx)
       sprdtemp = math.sqrt((letkf.sprd()**2).sum()/nx)
-#    if ( round(step/1,4).is_integer() and step-inittime_nature < 10 ):
-      if ( step-inittime_nature < 10 ):
+      if ( round(step/1,4).is_integer() and step-inittime_nature < 10 ):
         print('time ', round(time_nature[step],4),' RMSE ', round(rmsetemp,4), ' RMSE(raw) ', round(rmseraw,4), ' SPRD ', round(sprdtemp,4) )
-#          print('time ', round(time_obs[step_obs],4),' RMSE ', rmse,' SPRD ',sprd)
       rmse.append(math.sqrt(((letkf.mean()-nature[step+1])**2).sum() /nx))
       sprd.append(math.sqrt((letkf.sprd()**2).sum()/nx))
-#  if ( round(icount/10,4).is_integer() ):
-#  print("time {0:10.4f}, RMSE , {1:8.4f}, SPRD ,{2:8.4f}".format(round(time_nature[step],4),rmse[step-inittime_nature],sprd[step-inittime_nature]))
-        
-#print("done")
 
   rmsesmp.append(rmse)
   sprdsmp.append(sprd)
@@ -174,6 +161,7 @@ if (os.path.isfile(expdir + '/' + obsdir + '/' + dadir + '/stats_' + tag + '.nc'
     nc.close
 else : 
     print('create')
+    os.system('mkdir -p ' + expdir + '/' + obsdir + '/' + dadir)
     nc = netCDF4.Dataset(expdir + '/' + obsdir + '/' + dadir + '/stats_' + tag + '.nc','w',format='NETCDF4')
     nc.createDimension('t',length+1)
     nc.createDimension('s',None)

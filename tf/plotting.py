@@ -89,7 +89,7 @@ def plot_func(plist, c_forecast, analysis, forecast, c_rmse, rmse, exp_name):
         mlflow.log_metric('C_RMSE', c_rmse)
         mlflow.log_metric('B_RMSE', rmse)
         mlflow.log_artifacts(image_dir)
-        mlflow.log_param('LSTM', ', '.join(str(i) for i in plist['LSTM_output']))
+        mlflow.log_param('RNN', ', '.join(str(i) for i in plist['RNN_output']))
         mlflow.log_param('Dense', ', '.join(str(i) for i in plist['dense_output']))
         mlflow.log_param('Timesteps', str(plist['time_splits']))
         mlflow.log_param('Locality', str(plist['locality']))
@@ -103,7 +103,7 @@ def plot_func_amemiya(c_forecast, analysis, forecast, exp_name, run_name, order,
         
         #Randomly select five variables for plotting
         random_variables = np.random.randint(low = 0, high=analysis.shape[1], size=5)
-        image_dir = ('/mshlok/images')
+        image_dir = ('/images')
         if not(os.path.exists(image_dir)):
             os.mkdir(image_dir)
 

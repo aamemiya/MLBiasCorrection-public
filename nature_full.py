@@ -53,7 +53,7 @@ nature = np.array(nature, dtype=np.float64)
 nature_vv = np.array(nature_vv, dtype=np.float64)
 time_nature = np.array(time_nature, dtype=np.float64)
 
-nc = netCDF4.Dataset(expdir + '/nature_full_test.nc','w',format='NETCDF3_CLASSIC')
+nc = netCDF4.Dataset(expdir + '/nature_full.nc','w',format='NETCDF3_CLASSIC')
 nc.createDimension('x',nx)
 nc.createDimension('xx',nxx)
 nc.createDimension('t',None)

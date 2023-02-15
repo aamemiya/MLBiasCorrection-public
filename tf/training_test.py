@@ -7,8 +7,6 @@ import os
 import sys
 import re
 import optuna
-import mlflow
-import mlflow.tensorflow
 
 import helperfunctions as helpfunc
 import network_arch as net
@@ -20,18 +18,13 @@ mirrored_strategy = tf.distribute.MirroredStrategy()
 def train(trial, plist, model, checkpoint, manager, summary_writer, optimizer, train_dataset_dist, val_dataset_dist):
   
     ename = plist['optuna_db']#re.search('DATA/(.+?)/', plist['netCDf_loc'])
-    mlflow.set_experiment(str(datetime.date.today()) + '_' + ename)#.group(1))
     
     try:
         rname = str(trial.study.study_name) + '_' + str(trial.number)
     except:
         rname = plist['experiment_name'] 
 
-    with mlflow.start_run(run_name = rname):
-
-        mlflow.set_tags(trial.params)
-
-        with mirrored_strategy.scope():
+    with mirrored_strategy.scope():
             
             loss_func = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM, name='LossMSE')
             #loss_func = tf.keras.losses.MeanAbsoluteError(reduction = tf.keras.losses.Reduction.SUM, name='LossMSE')
@@ -68,31 +61,31 @@ def train(trial, plist, model, checkpoint, manager, summary_writer, optimizer, t
                 return loss, metric
 
             def val_step(inputs):
-                local_forecast, analysis = inputs
+                local_forecast, analysis, accuracy = inputs
                 pred_analysis, _ = model(local_forecast, stat = [])
 
                 try:
-                    loss = compute_loss(analysis[:, -1, :], pred_analysis) * plist['grad_mellow'] * (1.0 / (plist['global_batch_size_v']))
+                    loss = compute_loss(analysis[:, -1, :], pred_analysis, accuracy[:, -1, :]) * plist['grad_mellow'] * (1.0 / (plist['global_batch_size_v']))
                 except:
-                    loss = compute_loss(analysis, pred_analysis) * plist['grad_mellow'] * (1.0 / (plist['global_batch_size_v']))
+                    loss = compute_loss(analysis, pred_analysis, accuracy) * plist['grad_mellow'] * (1.0 / (plist['global_batch_size_v']))
 
                 try:
-                    metric = (compute_metric(analysis[:, -1, :], pred_analysis)) * (1.0 / (plist['global_batch_size_v']))
+                    metric = (compute_metric(analysis[:, -1, :], pred_analysis, accuracy[:, -1, :])) * (1.0 / (plist['global_batch_size_v']))
                 except:
-                    metric = (compute_metric(analysis, pred_analysis)) * (1.0 / (plist['global_batch_size_v']))
+                    metric = (compute_metric(analysis, pred_analysis, accuracy)) * (1.0 / (plist['global_batch_size_v']))
 
                 return loss, metric 
 
             @tf.function
             def distributed_train_step(inputs):
-                per_replica_losses, per_replica_metric = mirrored_strategy.experimental_run_v2(train_step, args=(inputs,))
+                per_replica_losses, per_replica_metric = mirrored_strategy.run(train_step, args=(inputs,))
                 loss = mirrored_strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_losses, axis=None)
                 met = mirrored_strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_metric, axis=None)
                 return loss, tf.sqrt(met)
 
             @tf.function
             def distributed_val_step(inputs):
-                per_replica_losses, per_replica_metric = mirrored_strategy.experimental_run_v2(val_step, args=(inputs,))
+                per_replica_losses, per_replica_metric = mirrored_strategy.run(val_step, args=(inputs,))
                 loss =  mirrored_strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_losses, axis=None)
                 met =  mirrored_strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_metric, axis=None)
                 return loss, tf.sqrt(met)
@@ -165,13 +158,6 @@ def train(trial, plist, model, checkpoint, manager, summary_writer, optimizer, t
                         print("\nRMSE {}\n".format(v_metric.numpy()))
                         plist['val_min'] = val_loss_min
 
-                    if not(epoch % plist['summery_freq']):
-                        mlflow.log_metric('Val_MSE', val_loss_min.numpy(), step= (plist['global_epoch']))
-                        mlflow.log_metric('Train_MSE', loss.numpy(), step= (plist['global_epoch']))
-                        mlflow.log_metric('Val_RMSE', v_metric.numpy(), step= (plist['global_epoch']))
-                        mlflow.log_metric('Train_RMSE', t_metric.numpy(), step= (plist['global_epoch']))
-                        mlflow.log_metric('LearningRate', optimizer._decayed_lr(var_dtype = tf.float32).numpy(), step= (plist['global_epoch']))
-
                     if math.isnan(v_metric):
                         print('Breaking out as the validation loss is nan')
                         break                
@@ -190,23 +176,15 @@ def train(trial, plist, model, checkpoint, manager, summary_writer, optimizer, t
 
                     print('Time for epoch (seconds): %s' %((time.time() - start_time)))
     
-        print('\n Total trainig time (in minutes): {}'.format((time.time()-timer_tot)/60))
+    print('\n Total training time (in minutes): {}'.format((time.time()-timer_tot)/60))
 
-        helpfunc.write_pickle(plist, plist['pickle_name'])
-        mlflow.log_artifact(plist['pickle_name'])
-        mlflow.log_artifact('../param.py')
-        mlflow.log_artifact('./run_exp_optoti.sh')
-        mlflow.log_artifact('./Exp.py')
-        mlflow.log_artifact('./training_test.py')
-        mlflow.log_artifact('./network_arch.py')
-        mlflow.log_params(plist)
-        mlflow.end_run()
+    helpfunc.write_pickle(plist, plist['pickle_name'])
 
     return val_loss_min
     
 def traintest(trial, plist):
 
-    print('\nGPU Available: {}\n'.format(tf.test.is_gpu_available()))
+    print('\nGPU Available: {}\n'.format(tf.config.list_physical_devices('GPU')))
 
     #Get dataset
     print("\nProcessing Dataset\n")

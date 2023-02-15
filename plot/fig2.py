@@ -7,7 +7,7 @@ import numpy as np
 import os
 import shutil
 
-ncdir="../DATA/coupled_A13/obs_010/nocorr"
+ncdir="../DATA/coupled_A13/obs_p8_010/nocorr"
 
 # load nature and observation data
 nc = netCDF4.Dataset(ncdir + '/assim.nc','r',format='NETCDF4')

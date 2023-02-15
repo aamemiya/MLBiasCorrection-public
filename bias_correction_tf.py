@@ -7,8 +7,8 @@ import os
 import sys
 import pickle
 
-import tf/network_arch as net
-import helperfunctions as helpfunc
+import tf.network_arch as net
+import tf.helperfunctions as helpfunc
 
 import param
 
@@ -24,13 +24,12 @@ class BCTF():
     self.inp_locality = np.zeros((self.dim, 1, self.plist['locality']))
 
   def get_pickle(self):
-    pickle_name = './Python_files/n_experiments/'+ param.param_bc["tf_expname"] + '/checkpoint/params.pickle' #Enter the location of the parameter_list pickle file name
-#    pickle_name = './n_experiments/test_topo_linear/checkpoint/params.pickle' #Enter the location of the parameter_list pickle file name
-#    pickle_name = './n_experiments/shear_LD_tanh5_5_best/checkpoint/params.pickle' #Enter the location of the parameter_list pickle file name
-#    pickle_name = './n_experiments/slow_sint_0_CLD_tanh10_5_best/checkpoint/params.pickle' #Enter the location of the parameter_list pickle file name
+#    pickle_name = './tf/n_experiments/'+ param.param_bc["tf_expname"] + '/checkpoint/params.pickle' #Enter the location of the parameter_list pickle file name
+    pickle_name = './tf/n_experiments/'+ param.param_bc["tf_expname"] + '/checkpoint/params.pickle' #Enter the location of the parameter_list pickle file name
+#    pickle_name = '/home/amemiya/test_ckpt/checkpoint/params.pickle' #Enter the location of the parameter_list pickle file name
     parameter_list = helpfunc.read_pickle(pickle_name)
 
-    parameter_list['NN_type'] = 'LSTM'
+#    parameter_list['NN_type'] = 'LSTM'
 
 #    print(parameter_list)
 #    quit()

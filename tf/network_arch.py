@@ -12,15 +12,15 @@ class rnn_model(tf.keras.Model):
 
     def __init__(self, parameter_list, name = 'RNN_Model'):
         super(rnn_model, self).__init__()
-        self.unit = parameter_list['LSTM_output']
+        self.unit = parameter_list['RNN_output']
         self.acti = parameter_list['activation']
         self.acti_d = parameter_list['d_activation']
         self.recurrent_activ = parameter_list['rec_activation']
         self.kernel_regular = tf.keras.regularizers.l2(parameter_list['l2_regu'])
         self.activity_regular = tf.keras.regularizers.l1(parameter_list['l1_regu'])
-        self.drop = parameter_list['lstm_dropout']
-        self.recurrent_drop = parameter_list['rec_lstm_dropout']
-        self.num_layers = parameter_list['num_lstm_layers']
+        self.drop = parameter_list['rnn_dropout']
+        self.recurrent_drop = parameter_list['rec_rnn_dropout']
+        self.num_layers = parameter_list['num_rnn_layers']
         self.num_dense_layers = parameter_list['num_dense_layers']
         self.dense_out = parameter_list['dense_output']
         self.locality = parameter_list['locality']
@@ -28,11 +28,11 @@ class rnn_model(tf.keras.Model):
 
     def build(self, input_shape):
 
-        self.lstm_list = []
+        self.rnn_list = []
         i = 0
         for i in range(self.num_layers):
             if (self.type == "LSTM") : 
-                self.lstm_list.append(tf.keras.layers.LSTM(units = self.unit[i], 
+                self.rnn_list.append(tf.keras.layers.LSTM(units = self.unit[i], 
                                                     activation = self.acti,
                                                     recurrent_activation = self.recurrent_activ,
                                                     kernel_regularizer = self.kernel_regular,
@@ -43,7 +43,7 @@ class rnn_model(tf.keras.Model):
                                                     name = 'LSTM_{}'.format(i+1), 
                                                     return_state=True))
             elif (self.type == "GRU") : 
-                self.lstm_list.append(tf.keras.layers.GRU(units = self.unit[i], 
+                self.rnn_list.append(tf.keras.layers.GRU(units = self.unit[i], 
                                                     activation = self.acti,
                                                     recurrent_activation = self.recurrent_activ,
                                                     kernel_regularizer = self.kernel_regular,
@@ -55,7 +55,7 @@ class rnn_model(tf.keras.Model):
                                                     return_state=True))
 
             elif (self.type == "SimpleRNN") : 
-               self.lstm_list.append(tf.keras.layers.SimpleRNN(units = self.unit[i], 
+               self.rnn_list.append(tf.keras.layers.SimpleRNN(units = self.unit[i], 
                                                     activation = self.acti,
 #                                                    recurrent_activation = self.recurrent_activ,
                                                     kernel_regularizer = self.kernel_regular,
@@ -67,7 +67,7 @@ class rnn_model(tf.keras.Model):
                                                     return_state=True))
 
             elif (self.type == "Dense") : 
-               self.lstm_list.append(tf.keras.layers.Dense(units = self.unit[i], 
+               self.rnn_list.append(tf.keras.layers.Dense(units = self.unit[i], 
                                                     activation = self.acti,
 #                                                    recurrent_activation = self.recurrent_activ,
                                                     kernel_regularizer = self.kernel_regular,
@@ -95,19 +95,19 @@ class rnn_model(tf.keras.Model):
         state_h = [initializer([inputs.shape[0], self.unit[i]], dtype = tf.dtypes.float32) for i in range(self.num_layers)]
         state_c = [initializer([inputs.shape[0], self.unit[i]], dtype = tf.dtypes.float32) for i in range(self.num_layers)]
         x = inputs
-        for i in range(len(self.lstm_list)):
+        for i in range(len(self.rnn_list)):
             if (self.type == "LSTM") : 
               try:
-                  x, state_h[i], state_c[i] = self.lstm_list[i](x, initial_state = [stat[0][i], stat[1][i]])
+                  x, state_h[i], state_c[i] = self.rnn_list[i](x, initial_state = [stat[0][i], stat[1][i]])
               except:
-                  x, state_h[i], state_c[i] = self.lstm_list[i](x, initial_state = [state_h[i], state_c[i]])
+                  x, state_h[i], state_c[i] = self.rnn_list[i](x, initial_state = [state_h[i], state_c[i]])
             if (self.type == "GRU" or self.type == "SimpleRNN") : 
               try:
-                  x, state_h[i] = self.lstm_list[i](x, initial_state = [stat[0][i]])
+                  x, state_h[i] = self.rnn_list[i](x, initial_state = [stat[0][i]])
               except:
-                  x, state_h[i] = self.lstm_list[i](x, initial_state = [state_h[i]])
+                  x, state_h[i] = self.rnn_list[i](x, initial_state = [state_h[i]])
             if (self.type == "Dense") : 
-                x = self.lstm_list[i](x)
+                x = self.rnn_list[i](x)
         
         #Only using last time-step as the input to the dense layer
         try:

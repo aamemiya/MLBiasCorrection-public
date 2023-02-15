@@ -4,7 +4,7 @@ This repository contains the codes for a paper by [Amemiya, Shlok, and Miyoshi](
 
 ## Acknowledgement
 The main part of the Lorenz96 LETKF code is originally developed by Shigenori Otsuka ([https://github.com/otsuka-shigenori/da_demo](https://github.com/otsuka-shigenori/da_demo))  
-The codes with Keras Tensorflow is developed by Shlok Mohta. 
+The codes usnig Tensorflow and Optuna is developed by Shlok Mohta. 
 
 ## Run the experiment 
 
@@ -25,9 +25,10 @@ param_model['c'] = 4                        ###
 param_letkf = {}
 param_letkf['obs_error'] = 0.10               ### Observation error standard deviation
 param_letkf['obs_number'] =8                  ### Number of grids to observe
-param_letkf['localization_length_scale'] = 3  ### Width scale for localization
-param_letkf['localization_length_cutoff'] = 8 ### Cutoff scale for localization  
-param_letkf['inflation_factor'] = 2.1         ### Multiplicative inflation factor
+param_letkf['localization_length_scale'] = 1  ### Width scale for localization
+param_letkf['localization_length_cutoff'] = 1 ### Cutoff scale for localization  
+param_letkf['inflation_factor'] = 1.0         ### Multiplicative inflation factor
+param_letkf['additive_inflation_factor']=0.25 ### Additive inflation factor
 param_letkf['missing_value'] = -9.99e8
 
 param_exp = {}

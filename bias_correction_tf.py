@@ -81,12 +81,9 @@ class BCTF():
       self.network_array = np.roll(self.network_array, -1, axis = 1)  #Here was the faulty code as axis argument was initally 0, creating faulty inputs for LSTM case.
       self.network_array[:,-1,:] = np.squeeze(self.inp_locality, 1)        #Dense case was doing OK because all the Variable dimension was updated in this step. 
 
-      if self.plist["NN_type"]  == "Dense" :
-        pred_array_tmp=self.pred(self.network_array[:,-1,:])[0].numpy()
-        pred_array=np.squeeze(pred_array_tmp)
-      else :
-        pred_array_tmp=self.pred(self.network_array)[0].numpy()
-        pred_array=np.squeeze(pred_array_tmp)
+      pred_array_tmp=self.pred(self.network_array)[0].numpy()
+      pred_array=np.squeeze(pred_array_tmp)
+
 
       return pred_array + inp 
 #      return np.squeeze(self.pred(self.network_array)[0].numpy()) + inp 

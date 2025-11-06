@@ -70,18 +70,26 @@ class BCTF():
   @tf.function
   def pred(self, fore):
 
-    return self.model(fore, [])
+    return self.model(tf.convert_to_tensor(fore), [])
 
   def predict(self, inp):
     for i in range(param.param_exp["ensembles"]):
-      #self.inp_locality[i*self.num_var:(i+1)*self.num_var] = self.locality_gen( ( (inp[i*self.num_var:(i+1)*self.num_var] ) - self.a_f) / self.s_f )
-      self.inp_locality[i*self.num_var:(i+1)*self.num_var] = self.locality_gen( inp[i*self.num_var:(i+1)*self.num_var] )
+      self.inp_locality[i*self.num_var:(i+1)*self.num_var] = self.locality_gen( ( (inp[i*self.num_var:(i+1)*self.num_var] ) - self.a_f) / self.s_f )
+      #self.inp_locality[i*self.num_var:(i+1)*self.num_var] = self.locality_gen( inp[i*self.num_var:(i+1)*self.num_var] )
 
     if self.inp_counter == self.time_splits:
       self.network_array = np.roll(self.network_array, -1, axis = 1)  #Here was the faulty code as axis argument was initally 0, creating faulty inputs for LSTM case.
       self.network_array[:,-1,:] = np.squeeze(self.inp_locality, 1)        #Dense case was doing OK because all the Variable dimension was updated in this step. 
 
-      return np.squeeze(self.pred(self.network_array)[0].numpy()) + inp 
+      if self.plist["NN_type"]  == "Dense" :
+        pred_array_tmp=self.pred(self.network_array[:,-1,:])[0].numpy()
+        pred_array=np.squeeze(pred_array_tmp)
+      else :
+        pred_array_tmp=self.pred(self.network_array)[0].numpy()
+        pred_array=np.squeeze(pred_array_tmp)
+
+      return pred_array + inp 
+#      return np.squeeze(self.pred(self.network_array)[0].numpy()) + inp 
     else:
       self.network_array[:,self.inp_counter,:] = np.squeeze(self.inp_locality, 1)
       self.inp_counter += 1

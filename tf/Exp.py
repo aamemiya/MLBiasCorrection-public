@@ -85,7 +85,7 @@ def my_config(trial):
           for i in range(plist['num_rnn_layers'] - 1):
               plist['RNN_output'].append(trial.suggest_int('rnn_' + str(i+1), 1, plist['RNN_output'][i]))
         else:
-          plist['time_splits'] = 1 
+          plist['time_splits'] = args.time_splits 
           print('\nNetwork is only dense\n')
           plist['num_rnn_layers'] = 0
           plist['RNN_output'] = []
@@ -112,15 +112,17 @@ def my_config(trial):
         for i in range(plist['num_dense_layers'] - 1):
             plist['dense_output'].append(4)
       else:
-        plist['time_splits'] = 1 
+        plist['time_splits'] = args.time_splits 
         print('\nNetwork is only dense\n')
         plist['num_rnn_layers'] = 0
         plist['RNN_output'] = []
-        plist['num_dense_layers'] = 3
+        plist['num_dense_layers'] = 1
+        plist['num_rnn_layers'] = 3
+        plist['RNN_output'] = []
+        plist['RNN_output'].append(20)
+        plist['RNN_output'].append(24)
+        plist['RNN_output'].append(20)
         plist['dense_output'] = []
-        plist['dense_output'].append(21)
-        plist['dense_output'].append(15)
-        plist['dense_output'].append(12)
 
       plist['dense_output'].append(1)
 
@@ -147,7 +149,7 @@ def my_config(trial):
     plist['lr_decay_steps'] = 1000
     plist['lr_decay_rate'] = 0
     plist['grad_mellow'] = 1
-    plist['learning_rate'] = 1.0e-3
+    plist['learning_rate'] = 1.0e-4
 
     try:
         plist['learning_rate'] = plist['learning_rate'] * plist['global_batch_size'] / (128 * len(tf.config.experimental.list_physical_devices('GPU')))

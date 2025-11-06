@@ -30,9 +30,10 @@ class rnn_model(tf.keras.Model):
 
         self.rnn_list = []
         i = 0
+        rnn_regist = []
         for i in range(self.num_layers):
             if (self.type == "LSTM") : 
-                self.rnn_list.append(tf.keras.layers.LSTM(units = self.unit[i], 
+                rnn_regist.append(tf.keras.layers.LSTM(units = self.unit[i], 
                                                     activation = self.acti,
                                                     recurrent_activation = self.recurrent_activ,
                                                     kernel_regularizer = self.kernel_regular,
@@ -43,7 +44,7 @@ class rnn_model(tf.keras.Model):
                                                     name = 'LSTM_{}'.format(i+1), 
                                                     return_state=True))
             elif (self.type == "GRU") : 
-                self.rnn_list.append(tf.keras.layers.GRU(units = self.unit[i], 
+                rnn_regist.append(tf.keras.layers.GRU(units = self.unit[i], 
                                                     activation = self.acti,
                                                     recurrent_activation = self.recurrent_activ,
                                                     kernel_regularizer = self.kernel_regular,
@@ -55,7 +56,7 @@ class rnn_model(tf.keras.Model):
                                                     return_state=True))
 
             elif (self.type == "SimpleRNN") : 
-               self.rnn_list.append(tf.keras.layers.SimpleRNN(units = self.unit[i], 
+               rnn_regist.append(tf.keras.layers.SimpleRNN(units = self.unit[i], 
                                                     activation = self.acti,
 #                                                    recurrent_activation = self.recurrent_activ,
                                                     kernel_regularizer = self.kernel_regular,
@@ -67,7 +68,7 @@ class rnn_model(tf.keras.Model):
                                                     return_state=True))
 
             elif (self.type == "Dense") : 
-               self.rnn_list.append(tf.keras.layers.Dense(units = self.unit[i], 
+               rnn_regist.append(tf.keras.layers.Dense(units = self.unit[i], 
                                                     activation = self.acti,
 #                                                    recurrent_activation = self.recurrent_activ,
                                                     kernel_regularizer = self.kernel_regular,
@@ -78,17 +79,30 @@ class rnn_model(tf.keras.Model):
 
 
         self.dense_list = []
+        dense_regist = []
         i = 0
-        for i in range(self.num_dense_layers):
-            self.dense_list.append(tf.keras.layers.Dense(units=self.dense_out[i],
+        for i in range(self.num_dense_layers - 1):
+            dense_regist.append(tf.keras.layers.Dense(units=self.dense_out[i],
                                     kernel_regularizer = self.kernel_regular,
                                     activation = self.acti_d,
                                     name = 'DENSE_{}'.format(i+1)))
             #self.dense_list.append(tf.keras.layers.PReLU(alpha_initializer = tf.constant_initializer(0.25), shared_axes = [1], name='PReLU_{}'.format(i+1)))
-        self.dense_list.append(tf.keras.layers.Dense(units=self.dense_out[-1],
+
+        dense_regist.append(tf.keras.layers.Dense(units=self.dense_out[-1],
                                             kernel_regularizer = self.kernel_regular,
                                             activation = None,
                                             name = 'DENSE_{}'.format(i+1)))
+
+        for i, layer in enumerate(rnn_regist, 1):
+          self.rnn_list.append(layer)
+          self._track_trackable(layer, name=f"rnn_{i}")  # explicit registration
+
+        for i, layer in enumerate(dense_regist, 1):
+          self.dense_list.append(layer)
+          self._track_trackable(layer, name=f"dense_{i}")  # explicit registration
+
+#####
+
     def call(self, inputs, stat):
         
         initializer = tf.initializers.GlorotUniform(seed = 1)
